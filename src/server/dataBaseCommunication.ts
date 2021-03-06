@@ -1,21 +1,6 @@
 import * as sql from "sqlite3";
 const sqlite = sql.verbose();
 
-/**
-  * 
-    ID INTEGER PRIMARY KEY,
-    -- IF IS DELETED THE VALUE IS 1 ELSE 0 
-    edit_or_delete BIT not null,
-    -- server
-    serverID VARCHAR(18) NOT NULL,
-    serverName VARCHAR(100) NOT NULL
-    -- chanel
-    channelID VARCHAR(18) NOT NULL,
-    channelName VARCHAR(100) NOT NULL,
-    -- message 
-    messageID VARCHAR(18) NOT NULL,
-    message_content VARCHAR(2000) NOT NULL DEFAULT "embed"
-  */
 function openDatabase(): sql.Database {
   return new sql.Database(__dirname + "/database/database.db", (err) => {
     if (err) return console.error(err.message);
@@ -26,18 +11,10 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
   db.run(
     `INSERT INTO messages(
               edit_or_delete,
-
-              serverID    ,
-              serverName  ,
-
-              channelID   ,
-              channelName ,
-              
-              userID  ,
-              username,
-              
-              messageID   ,
-              message_content
+              serverID    ,serverName  ,
+              channelID   ,channelName ,
+              userID      ,username,
+              messageID   ,message_content
               ) VALUES(
                 ?,?,?,
                 ?,?,?,
@@ -48,4 +25,33 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
     }
   );
   db.close();
+}
+export async function madeApi() {}
+
+interface Messages {
+  id: number;
+  edit_or_delete: boolean;
+  serverID: string;
+  serverName: string;
+  channelID: string;
+  channelName: string;
+  userID: string;
+  username: string;
+  messageID: string;
+  message_content: string;
+}
+interface BodyApi {
+  servers: {
+    ID: string;
+    name: string;
+  }[];
+  channels: {
+    ID: string;
+    name: string;
+  }[];
+  users: {
+    ID: string;
+    name: string;
+  };
+  messages: Messages[];
 }
