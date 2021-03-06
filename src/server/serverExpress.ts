@@ -1,2 +1,4 @@
 import * as express from "express";
-export default functiones setupRouter(){ }
+const router: express.Router = express.Router();
+
+export default function setupRouter() {}
