@@ -1,5 +1,5 @@
 node_modules/
 
-src/index.js
+*.js
 src/settings.json
 
