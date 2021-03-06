@@ -1,3 +1,5 @@
-./src/index.js
 node_modules/
-./src/settings.env
+
+src/index.js
+src/settings.json
+
