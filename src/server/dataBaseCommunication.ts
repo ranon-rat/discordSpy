@@ -40,7 +40,7 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
               message_content
               ) VALUES(
                 ?,?,?,
-                ?,?,?
+                ?,?,?,
                 ?,?,?)`,
     [editOrDelete ? 1 : 0, ...args],
     (err: Error) => {
