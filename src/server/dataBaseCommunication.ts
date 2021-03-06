@@ -26,19 +26,23 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
   db.run(
     `INSERT INTO messages(
               edit_or_delete,
+
               serverID    ,
               serverName  ,
+
               channelID   ,
               channelName ,
+              
+              userID  ,
+              username,
+              
               messageID   ,
-              message_content) VALUES(
-                ?,
-                ?,
-                ?,
-                ?,
-                ?,
-                ?)`,
-    [editOrDelete  ? 1  :  0, ...args],
+              message_content
+              ) VALUES(
+                ?,?,?,
+                ?,?,?
+                ?,?.?)`,
+    [editOrDelete ? 1 : 0, ...args],
     (err: Error) => {
       if (err) return console.error(err.message);
     }

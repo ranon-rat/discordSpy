@@ -8,7 +8,10 @@ CREATE TABLE messages(
     serverName           VARCHAR(100) NOT NULL,
     -- channel            
     channelID            VARCHAR(18) NOT NULL,
-    channelName          VARCHAR(100) NOT NULL,
+    channelName          VARCHAR(100) NOT NULL, 
+    -- user
+    userID               VARCHAR(18) NOT NULL,
+    username             VARCHAR(32) NOT NULL,
     -- message              
     messageID            VARCHAR(18) NOT NULL,
     message_content      VARCHAR(2000) NOT NULL DEFAULT "embed"
