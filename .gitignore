@@ -3,3 +3,4 @@ node_modules/
 src/settings.json
 *.js
 src/database/[{"stmt":"SELECT * FROM messages;","head.json
+src/setting.json

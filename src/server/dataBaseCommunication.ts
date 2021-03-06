@@ -17,21 +17,28 @@ const sqlite = sql.verbose();
     message_content VARCHAR(2000) NOT NULL DEFAULT "embed"
   */
 function openDatabase(): sql.Database {
-  return new sql.Database("../database/database.db", (err) => {
+  return new sql.Database(__dirname + "/database/database.db", (err) => {
     if (err) return console.error(err.message);
   });
 }
-export function uploadDatabase(editOrDelete: boolean, ...args: string[]): void {
+export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
   let db = openDatabase();
   db.run(
-    `INSERT INTO messages(edit_or_delete,
+    `INSERT INTO messages(
+              edit_or_delete,
               serverID    ,
               serverName  ,
               channelID   ,
               channelName ,
               messageID   ,
-              message_content) VALUES(?,?,?,?,?,?,?)`,
-    [editOrDelete, ...args],
+              message_content) VALUES(
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?)`,
+    [editOrDelete  ? 1  :  0, ...args],
     (err: Error) => {
       if (err) return console.error(err.message);
     }

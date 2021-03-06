@@ -16,4 +16,5 @@ client.on("messageUpdate", (msg) => {
   console.log("edit message");
   getTheMessages(msg, false);
 });
+
 client.login(token);
