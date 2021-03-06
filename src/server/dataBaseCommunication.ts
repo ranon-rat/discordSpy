@@ -41,7 +41,7 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
               ) VALUES(
                 ?,?,?,
                 ?,?,?
-                ?,?.?)`,
+                ?,?,?)`,
     [editOrDelete ? 1 : 0, ...args],
     (err: Error) => {
       if (err) return console.error(err.message);
