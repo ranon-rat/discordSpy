@@ -1,6 +1,5 @@
 // dependencies
 import * as sql from "sqlite3";
-import { Response } from "express";
 //constants
 const sqlite = sql.verbose();
 
@@ -31,54 +30,65 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
   );
   db.close();
 }
-export async function madeApi(w: Response) {
+export async function madeApi() {
   let db = openDatabase();
   let api: BodyApi;
-
-  db.each(`SELECT * FROM messages;`, async (row: sql.Statement, err: Error) => {
-    // select all the messages
-    if (err) return console.error(err.message);
-    api.messages.push({
-      // other stuff
-      ID: row.ID as number, //id
-      edit_or_delete: row.edit_or_delete as boolean, //
-      //server
-      serverID: row.serverID as string, // id
-      serverName: row.serverName as string,
-      //channel
-      channelID: row.channelID as string, // id
-      channelName: row.channelName as string,
-      //user
-      userID: row.userID as string, // id
-      username: row.username as string,
-      //message
-      messageID: row.messageID as string, // id
-      message_content: row.message_content as string,
-    });
-  })
+  // message
+  await db
+    .each(`SELECT * FROM messages;`, async (row: sql.Statement) => {
+      // select all the messages
+      await api.messages.push({
+        // other stuff
+        ID: row.ID as number, //id
+        edit_or_delete: row.edit_or_delete as boolean, //
+        //server
+        serverID: row.serverID as string, // id
+        serverName: row.serverName as string,
+        //channel
+        channelID: row.channelID as string, // id
+        channelName: row.channelName as string,
+        //user
+        userID: row.userID as string, // id
+        username: row.username as string,
+        //message
+        messageID: row.messageID as string, // id
+        message_content: row.message_content,
+      });
+    })
 
     .each(
       "SELECT DISTINCT serverID,serverName FROM messages;",
-      async (row: sql.Statement, err: Error) => {
-        if (err) return console.error(err.message);
-        api.servers.push({
+      async (row: sql.Statement) => {
+        // servers
+        await api.servers.push({
           ID: row.serverID as string,
           name: row.serverName as string,
         });
       }
     )
     .each(
+      // channels
       "SELECT DISTINCT channelID, channelName  FROM ",
-      async (row: sql.Statement, err: Error) => {
-        if (err) return console.error(err.message);
-        api.channels.push({
-          ID: row.channelID,
-          name: row.channelName,
-        });
+      async (row: sql.Statement) => {
+        // channels
+        await api.channels.push({ ID: row.channelID, name: row.channelName });
       }
     )
-    .each("SELECT DISTINCT  userID, username FROM messages;", async (row: sql.Statement, err: Error) => { });
+    .each(
+      // users
+      "SELECT DISTINCT  userID, username FROM messages;",
+      async (row: sql.Statement) => {
+        // users
+        await api.users.push({
+          ID: row.userID,
+          name: row.username,
+        });
+      }
+    );
+  Promise.resolve(api);
 }
+
+//////////DATABASE BODY\\\\\\\\\\\\\\\\
 /**
  *     ID INTEGER          PRIMARY KEY,
     -- IF IS DELETED THE VALUE IS 1 ELSE 0 
@@ -96,6 +106,10 @@ export async function madeApi(w: Response) {
     messageID            VARCHAR(18) NOT NULL,
     message_content      VARCHAR(2000) NOT NULL DEFAULT "embed"
  */
+
+/**
+ * THIS IS THE **BODY** OF THE DATABASE ONLY THAT
+ */
 interface BodyApi {
   servers: {
     ID: string;
@@ -108,7 +122,7 @@ interface BodyApi {
   users: {
     ID: string;
     name: string;
-  };
+  }[];
   messages: Messages[];
 }
 // messages
@@ -128,5 +142,4 @@ interface Messages {
   messageID: string;
   message_content: string;
 }
-// api 
-
+// api
