@@ -5,13 +5,13 @@ const sqlite = sql.verbose();
 
 // this connect the server with the database
 function openDatabase(): sql.Database {
-  return new sql.Database(__dirname + "/database/database.db", (err) => {
+  return new sqlite.Database(__dirname + "/database/database.db", (err) => {
     if (err) return console.error(err.message);
   });
 }
 // this upload the info to the database
 export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
-  let db = openDatabase();
+  const db = openDatabase();
   db.run(
     `INSERT INTO messages(
               edit_or_delete,
@@ -30,62 +30,83 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
   );
   db.close();
 }
-export async function madeApi() {
-  let db = openDatabase();
-  let api: BodyApi;
-  // message
-  await db
-    .each(`SELECT * FROM messages;`, async (row: sql.Statement) => {
-      // select all the messages
-      await api.messages.push({
-        // other stuff
-        ID: row.ID as number, //id
-        edit_or_delete: row.edit_or_delete as boolean, //
-        //server
-        serverID: row.serverID as string, // id
-        serverName: row.serverName as string,
-        //channel
-        channelID: row.channelID as string, // id
-        channelName: row.channelName as string,
-        //user
-        userID: row.userID as string, // id
-        username: row.username as string,
-        //message
-        messageID: row.messageID as string, // id
-        message_content: row.message_content,
-      });
-    })
-
-    .each(
-      "SELECT DISTINCT serverID,serverName FROM messages;",
-      async (row: sql.Statement) => {
+export async function madeApi(): Promise<BodyApi> {
+  const db = openDatabase();
+  let api: BodyApi = {
+    channels: [],
+    servers: [],
+    users: [],
+    messages: [],
+  };
+  ///////////// messageS\\\\\\\\\\\\\\\\\\\\\\\\\\\
+  await db.get(`SELECT * FROM messages`, (row: sql.Statement, err: Error) => {
+    console.log(`row of messages ${row} `);
+    /* if (err.message) return Promise.reject(err.message);
+        // select all the messages
+        api.messages.push({
+          // other stuff
+          ID: row.ID, //id
+          edit_or_delete: row.edit_or_delete, //
+          //server
+          serverID: row.serverID, // id
+          serverName: row.serverName,
+          //channel
+          channelID: row.channelID, // id
+          channelName: row.channelName,
+          //user
+          userID: row.userID, // id
+          username: row.username,
+          //message
+          messageID: row.messageID, // id
+          message_content: row.message_content,
+        });*/
+  });
+  /////////////// SERVER\\\\\\\\\\\\\\\\\\
+  /**
+   *   db.each("SELECT rowid AS id, info FROM user_info", function(err, row) {
+      console.log(row.id + ": " + row.info);
+  });
+   */
+  db.each(
+    "SELECT DISTINCT serverID,serverName FROM messages",
+    (row: sql.Statement) => {
+      console.log("row of servers", row.serverID);
+      /* if (err.message) return Promise.reject(err.message);
         // servers
-        await api.servers.push({
-          ID: row.serverID as string,
-          name: row.serverName as string,
-        });
-      }
-    )
-    .each(
-      // channels
-      "SELECT DISTINCT channelID, channelName  FROM ",
-      async (row: sql.Statement) => {
+        api.servers.push({
+          ID: row.serverID,
+          name: row.serverName,
+        });*/
+    }
+  );
+  /////////////CHANNELS\\\\\\\\\\\\\\\\
+  await db.get(
+    "SELECT DISTINCT channelID, channelName  FROM messages;",
+
+    (row: sql.Statement, err: Error) => {
+      if (err.message) console.log(err.message);
+      console.log("row of channels ", row);
+
+      /*   if (err.message) return Promise.reject(err.message);
         // channels
-        await api.channels.push({ ID: row.channelID, name: row.channelName });
-      }
-    )
-    .each(
-      // users
-      "SELECT DISTINCT  userID, username FROM messages;",
-      async (row: sql.Statement) => {
-        // users
-        await api.users.push({
-          ID: row.userID,
-          name: row.username,
-        });
-      }
-    );
-  Promise.resolve(api);
+        api.channels.push({ ID: row.channelID, name: row.channelName });*/
+    }
+  );
+  ////////////USERS\\\\\\\\\\
+  await db.get(
+    // users
+    "SELECT DISTINCT  userID, username FROM messages;",
+    (row: sql.Statement) => {
+      console.log("row of users", row);
+      /**if (err.message) return Promise.reject(err.message);
+          // users
+          api.users.push({
+            ID: row.userID,
+            name: row.username,
+          });*/
+    }
+  );
+  return Promise.resolve(api);
 }
 
 //////////DATABASE BODY\\\\\\\\\\\\\\\\

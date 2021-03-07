@@ -7,7 +7,7 @@ import { setupRouter} from "./server/serverExpress"
 import { token } from "./setting.json";
 // constants
 
-const app: = express();
+const app = express();
 const client = new discord.Client();
 console.log("starting");
 // messages

@@ -11,8 +11,10 @@ export function setupRouter(w: Response, r: Request): express.Router {
     router.get("/hello", (r, w) => {
       database
         .madeApi()
-        .then((res) => console.log(res))
-        .catch((e) => console.log(e));
+        .then((res) => w.send(res))
+        .catch((e) => {
+          e ? console.log(e) : null;
+        });
     });
   return router;
 }
