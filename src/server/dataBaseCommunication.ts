@@ -29,22 +29,22 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
   );
   db.close();
 }
+
+
 export function madeApi(w: Response) {
   const db = openDatabase();
-  // idk why is dont function 😩
-  var api: Api.BodyApi = {
-    channels: [],
-    servers: [],
-    users: [],
-    messages: [],
-    lenMessages: 0,
-  };
-  db.all(
-    `SELECT * FROM messages LIMIT 100`,
-    (err: Error, row: Api.Messages[]) =>
-      err ? console.error(err.message) : (api.messages = row)
-  )
-    .get(
+    db.all(`SELECT * FROM messages `, (err: Error, row: Api.Messages[]) =>
+      err ? console.error(err.message) : w.send(row)
+    );
+  // im query the data but they isn't changing the value of api
+  db.close();
+}
+   /* .get(
+     db.all(
+    "SELECT DISTINCT  userID as ID , username as name FROM messages",
+    (err: Error, row: { ID: string; name: string }[]) =>
+      err ? console.error(err.message) : w.send(row)
+  );
       "SELECT COUNT(*) AS lenMessages  FROM messages",
       (err: Error, row: number) =>
         err ? console.error(err.message) : (api.lenMessages = row)
@@ -63,7 +63,4 @@ export function madeApi(w: Response) {
       "SELECT DISTINCT  userID as ID , username as name FROM messages",
       (err: Error, row: { ID: string; name: string }[]) =>
         err ? console.error(err.message) : w.send((api.users = row))
-    );
-  // im query the data but they isn't changing the value of api
-  db.close();
-}
+    );*/
