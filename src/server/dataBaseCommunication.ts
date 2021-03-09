@@ -31,16 +31,16 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
   );
   db.close();
 }
-export function madeApi(): Promise<BodyApi> {
+export async function madeApi(): Promise<BodyApi> {
   const db = openDatabase();
-    var api: BodyApi = {
-  channels: [],
-  servers: [],
-  users: [],
-  messages: [],
-  lenMessages: 0,
-};
-  ///////////// messageS\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+  var api: BodyApi = {
+    channels: [],
+    servers: [],
+    users: [],
+    messages: [],
+    lenMessages: 0,
+  };
   db.all(`SELECT * FROM messages LIMIT 100`, (err: Error, row: Messages[]) =>
     err ? err : (api.messages = row)
   )
@@ -51,28 +51,23 @@ export function madeApi(): Promise<BodyApi> {
     )
     .all(
       "SELECT DISTINCT serverID  as ID ,serverName as name FROM messages",
-      (err: Error, row: { ID: string; name: string }[]) => {
-        err ? console.error(err.message) : (api.servers = row);
-      }
+      (err: Error, row: { ID: string; name: string }[]) =>
+        err ? console.error(err.message) : (api.servers = row)
     )
     .all(
       "SELECT DISTINCT channelID as ID, channelName as name FROM messages",
-
       (err: Error, row: { ID: string; name: string }[]) =>
         err ? console.error(err.message) : (api.channels = row)
     )
     .each(
-      // users
       "SELECT DISTINCT  userID as ID , username as name FROM messages",
-
-      (err: Error, row: { ID: string; name: string }[]) =>
-        err ? console.error(err.message) : (api.users = row)
-    );
-  console.log(api);
-  /////////////// SERVER\\\\\\\\\\\\\\\\\\
-
+      (err: Error, row: { ID: string; name: string }[]) => {
+        err ? console.error(err.message) : (api.users = row);      
+      }
+  );
   db.close();
   return Promise.resolve(api);
+
 }
 
 //////////DATABASE BODY\\\\\\\\\\\\\\\\
