@@ -1,4 +1,5 @@
 // dependencies
+import { Message } from "discord.js";
 import * as sql from "sqlite3";
 //constants
 const sqlite = sql.verbose();
@@ -6,7 +7,7 @@ const sqlite = sql.verbose();
 // this connect the server with the database
 function openDatabase(): sql.Database {
   return new sqlite.Database(__dirname + "/database/database.db", (err) => {
-    if (err) return console.error(err.message);
+    if (err) return console.error(err);
   });
 }
 // this upload the info to the database
@@ -32,78 +33,70 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
 }
 export async function madeApi(): Promise<BodyApi> {
   const db = openDatabase();
-  let api: BodyApi = {
+  var api: BodyApi = {
     channels: [],
     servers: [],
     users: [],
     messages: [],
   };
   ///////////// messageS\\\\\\\\\\\\\\\\\\\\\\\\\\\
-  await db.get(`SELECT * FROM messages`, (row: sql.Statement, err: Error) => {
-    console.log(`row of messages ${row} `);
-    /* if (err.message) return Promise.reject(err.message);
-        // select all the messages
-        api.messages.push({
-          // other stuff
-          ID: row.ID, //id
-          edit_or_delete: row.edit_or_delete, //
-          //server
-          serverID: row.serverID, // id
-          serverName: row.serverName,
-          //channel
-          channelID: row.channelID, // id
-          channelName: row.channelName,
-          //user
-          userID: row.userID, // id
-          username: row.username,
-          //message
-          messageID: row.messageID, // id
-          message_content: row.message_content,
-        });*/
+  db.get(`SELECT * FROM messages`, (err: Error, row: Messages) => {
+    if (err) return Promise.reject(err);
+
+    api.messages.push({
+      // other stuff
+      ID: row.ID, //id
+      edit_or_delete: row.edit_or_delete, //
+      //server
+      serverID: row.serverID, // id
+      serverName: row.serverName,
+      //channel
+      channelID: row.channelID, // id
+      channelName: row.channelName,
+      //user
+      userID: row.userID, // id
+      username: row.username,
+      //message
+      messageID: row.messageID, // id
+      message_content: row.message_content,
+    });
   });
   /////////////// SERVER\\\\\\\\\\\\\\\\\\
-  /**
-   *   db.each("SELECT rowid AS id, info FROM user_info", function(err, row) {
-      console.log(row.id + ": " + row.info);
-  });
-   */
-  db.each(
+
+   db. each(
     "SELECT DISTINCT serverID,serverName FROM messages",
-    (row: sql.Statement) => {
-      console.log("row of servers", row.serverID);
-      /* if (err.message) return Promise.reject(err.message);
-        // servers
-        api.servers.push({
-          ID: row.serverID,
-          name: row.serverName,
-        });*/
+    (err: Error, row: Messages) => {
+      if (err) return Promise.reject(err);
+      // servers
+      api.servers.push({
+        ID: row.serverID,
+        name: row.serverName,
+      });
     }
   );
   /////////////CHANNELS\\\\\\\\\\\\\\\\
-  await db.get(
+ db.get(
     "SELECT DISTINCT channelID, channelName  FROM messages;",
 
-    (row: sql.Statement, err: Error) => {
-      if (err.message) console.log(err.message);
-      console.log("row of channels ", row);
+   (err: Error, row: {channelID:string,channelName:string}) =>
+   {
+      if (err) return Promise.reject(err);
 
-      /*   if (err.message) return Promise.reject(err.message);
-        // channels
-        api.channels.push({ ID: row.channelID, name: row.channelName });*/
+      api.channels.push({ ID: row.channelID, name: row.channelName });
     }
   );
   ////////////USERS\\\\\\\\\\
-  await db.get(
+ db.get(
     // users
-    "SELECT DISTINCT  userID, username FROM messages;",
-    (row: sql.Statement) => {
-      console.log("row of users", row);
-      /**if (err.message) return Promise.reject(err.message);
-          // users
-          api.users.push({
-            ID: row.userID,
-            name: row.username,
-          });*/
+    "SELECT DISTINCT  userID, username FROM messages",
+   (err: Error, row: {userID:string,username:string}) => {
+      if (err) return Promise.reject(err);
+      console.log(row)
+      // users
+      api.users.push({
+        ID: row.userID,
+        name: row.username,
+      });
     }
   );
   return Promise.resolve(api);
