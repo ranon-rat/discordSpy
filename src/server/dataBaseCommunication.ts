@@ -31,74 +31,47 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
   );
   db.close();
 }
-export async function madeApi(): Promise<BodyApi> {
+export function madeApi(): Promise<BodyApi> {
   const db = openDatabase();
-  var api: BodyApi = {
-    channels: [],
-    servers: [],
-    users: [],
-    messages: [],
-  };
+    var api: BodyApi = {
+  channels: [],
+  servers: [],
+  users: [],
+  messages: [],
+  lenMessages: 0,
+};
   ///////////// messageS\\\\\\\\\\\\\\\\\\\\\\\\\\\
-  db.get(`SELECT * FROM messages`, (err: Error, row: Messages) => {
-    if (err) return Promise.reject(err);
+  db.all(`SELECT * FROM messages LIMIT 100`, (err: Error, row: Messages[]) =>
+    err ? err : (api.messages = row)
+  )
+    .get(
+      "SELECT COUNT(*) AS lenMessages  FROM messages",
+      (err: Error, row: number) =>
+        err ? console.error(err.message) : (api.lenMessages = row)
+    )
+    .all(
+      "SELECT DISTINCT serverID  as ID ,serverName as name FROM messages",
+      (err: Error, row: { ID: string; name: string }[]) => {
+        err ? console.error(err.message) : (api.servers = row);
+      }
+    )
+    .all(
+      "SELECT DISTINCT channelID as ID, channelName as name FROM messages",
 
-    api.messages.push({
-      // other stuff
-      ID: row.ID, //id
-      edit_or_delete: row.edit_or_delete, //
-      //server
-      serverID: row.serverID, // id
-      serverName: row.serverName,
-      //channel
-      channelID: row.channelID, // id
-      channelName: row.channelName,
-      //user
-      userID: row.userID, // id
-      username: row.username,
-      //message
-      messageID: row.messageID, // id
-      message_content: row.message_content,
-    });
-  });
+      (err: Error, row: { ID: string; name: string }[]) =>
+        err ? console.error(err.message) : (api.channels = row)
+    )
+    .each(
+      // users
+      "SELECT DISTINCT  userID as ID , username as name FROM messages",
+
+      (err: Error, row: { ID: string; name: string }[]) =>
+        err ? console.error(err.message) : (api.users = row)
+    );
+  console.log(api);
   /////////////// SERVER\\\\\\\\\\\\\\\\\\
 
-   db. each(
-    "SELECT DISTINCT serverID,serverName FROM messages",
-    (err: Error, row: Messages) => {
-      if (err) return Promise.reject(err);
-      // servers
-      api.servers.push({
-        ID: row.serverID,
-        name: row.serverName,
-      });
-    }
-  );
-  /////////////CHANNELS\\\\\\\\\\\\\\\\
- db.get(
-    "SELECT DISTINCT channelID, channelName  FROM messages;",
-
-   (err: Error, row: {channelID:string,channelName:string}) =>
-   {
-      if (err) return Promise.reject(err);
-
-      api.channels.push({ ID: row.channelID, name: row.channelName });
-    }
-  );
-  ////////////USERS\\\\\\\\\\
- db.get(
-    // users
-    "SELECT DISTINCT  userID, username FROM messages",
-   (err: Error, row: {userID:string,username:string}) => {
-      if (err) return Promise.reject(err);
-      console.log(row)
-      // users
-      api.users.push({
-        ID: row.userID,
-        name: row.username,
-      });
-    }
-  );
+  db.close();
   return Promise.resolve(api);
 }
 
@@ -137,6 +110,7 @@ interface BodyApi {
     ID: string;
     name: string;
   }[];
+  lenMessages: number;
   messages: Messages[];
 }
 // messages
