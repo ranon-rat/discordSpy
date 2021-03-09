@@ -9,10 +9,7 @@ export function setupRouter(w: Response, r: Request): express.Router {
     w.send("hello world");
   });
     router.get("/hello", (r, w) => {
-      database
-        .madeApi()
-        .then((res) => w.send(res))
-        .catch((e) => (e ? console.log(e) : null));
+      database.madeApi(w);
     });
   return router;
 }
