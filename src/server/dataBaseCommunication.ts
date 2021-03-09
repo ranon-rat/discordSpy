@@ -29,7 +29,7 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
 }
 export async function madeApi(): Promise<BodyApi> {
   const db = openDatabase();
-// idk why is dont function 😩
+  // idk why is dont function 😩
   var api: BodyApi = {
     channels: [],
     servers: [],
@@ -37,12 +37,12 @@ export async function madeApi(): Promise<BodyApi> {
     messages: [],
     lenMessages: 0,
   };
-  // im query the data but they isn't changing the value of api 
+  // im query the data but they isn't changing the value of api
   db.all(`SELECT * FROM messages LIMIT 100`, (err: Error, row: Messages[]) =>
     err ? err : (api.messages = row)
   )
     .get(
-      // so finally i can query the data but is didnt changing the value 
+      // so finally i can query the data but is didnt changing the value
       "SELECT COUNT(*) AS lenMessages  FROM messages",
       (err: Error, row: number) =>
         err ? console.error(err.message) : (api.lenMessages = row)
@@ -59,13 +59,12 @@ export async function madeApi(): Promise<BodyApi> {
     )
     .each(
       "SELECT DISTINCT  userID as ID , username as name FROM messages",
-      (err: Error, row: { ID: string; name: string }[]) => {
-        err ? console.error(err.message) : (api.users = row);      
-      }
-  );
+      (err: Error, row: { ID: string; name: string }[]) =>
+        err ? console.error(err.message) : (api.users = row)
+    );
+
   db.close();
   return Promise.resolve(api);
-
 }
 
 //////////DATABASE BODY\\\\\\\\\\\\\\\\
