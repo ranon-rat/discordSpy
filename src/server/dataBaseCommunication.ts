@@ -15,25 +15,21 @@ export async function uploadDatabase(editOrDelete: boolean, ...args: string[]) {
   const db = openDatabase();
   db.run(
     `INSERT INTO messages(
-              edit_or_delete,
-              serverID    ,serverName  ,
-              channelID   ,channelName ,
-              userID      ,username,
-              messageID   ,message_content
+              edit_or_delete, serverID      ,serverName,
+              channelID     ,channelName    ,userID,
+              username      ,messageID      ,message_content
               ) VALUES(
                 ?,?,?,
                 ?,?,?,
                 ?,?,?)`,
     [editOrDelete ? 1 : 0, ...args],
-    (err: Error) => {
-      if (err) return console.error(err.message);
-    }
+    (err: Error) => (err ? console.error(err.message) : null)
   );
   db.close();
 }
 export async function madeApi(): Promise<BodyApi> {
   const db = openDatabase();
-
+// idk why is dont function 😩
   var api: BodyApi = {
     channels: [],
     servers: [],
@@ -41,10 +37,12 @@ export async function madeApi(): Promise<BodyApi> {
     messages: [],
     lenMessages: 0,
   };
+  // im query the data but they isn't changing the value of api 
   db.all(`SELECT * FROM messages LIMIT 100`, (err: Error, row: Messages[]) =>
     err ? err : (api.messages = row)
   )
     .get(
+      // so finally i can query the data but is didnt changing the value 
       "SELECT COUNT(*) AS lenMessages  FROM messages",
       (err: Error, row: number) =>
         err ? console.error(err.message) : (api.lenMessages = row)
@@ -72,25 +70,23 @@ export async function madeApi(): Promise<BodyApi> {
 
 //////////DATABASE BODY\\\\\\\\\\\\\\\\
 /**
- *     ID INTEGER          PRIMARY KEY,
-    -- IF IS DELETED THE VALUE IS 1 ELSE 0 
-    edit_or_delete       BIT  not null,
-    -- server
-    serverID             VARCHAR(18) NOT NULL,
-    serverName           VARCHAR(100) NOT NULL,
-    -- channel            
-    channelID            VARCHAR(18) NOT NULL,
-    channelName          VARCHAR(100) NOT NULL, 
-    -- user
-    userID               VARCHAR(18) NOT NULL,
-    username             VARCHAR(32) NOT NULL,
-    -- message              
-    messageID            VARCHAR(18) NOT NULL,
-    message_content      VARCHAR(2000) NOT NULL DEFAULT "embed"
- */
-
-/**
- * THIS IS THE **BODY** OF THE DATABASE ONLY THAT
+ * # this is the body of the api is only that
+ * but the database its looks like this
+ * 
+ * 
+ * |name | type|
+ * |---|---|
+    ID INTEGER      |    PRIMARY KEY,
+    edit_or_delete  |     BIT  not null,
+    serverID        |     VARCHAR(18) NOT NULL,
+    serverName      |     VARCHAR(100) NOT NULL,     
+    channelID       |     VARCHAR(18) NOT NULL,
+    channelName     |     VARCHAR(100) NOT NULL, 
+    userID          |     VARCHAR(18) NOT NULL,
+    username        |     VARCHAR(32) NOT NULL,      
+    messageID       |     VARCHAR(18) NOT NULL,
+    message_content |     VARCHAR(2000) NOT NULL DEFAULT "embed"
+    
  */
 interface BodyApi {
   servers: {
@@ -108,20 +104,20 @@ interface BodyApi {
   lenMessages: number;
   messages: Messages[];
 }
-// messages
+// **message**
 interface Messages {
   ID: number;
   edit_or_delete: boolean;
-  // server
+  // **server**
   serverID: string;
   serverName: string;
-  //channel
+  //**channel**
   channelID: string;
   channelName: string;
-  // user
+  // **user**
   userID: string;
   username: string;
-  // message
+  // **message**
   messageID: string;
   message_content: string;
 }
