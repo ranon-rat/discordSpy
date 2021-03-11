@@ -17,6 +17,6 @@ client.on("messageDelete", (msg) => {
 client.on("messageUpdate", (msg) => {
   getTheMessages(msg, false);
 });
-app.use("/",setupRouter())
+app.use("/", setupRouter);
 app.listen(8080 || process.env.PORT, () => console.log("starting server"));
 client.login(token);

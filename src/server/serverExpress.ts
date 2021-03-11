@@ -5,11 +5,9 @@ const router: express.Router = express.Router();
 // this is the body api
 
 export function setupRouter(w: Response, r: Request): express.Router {
-  router.get("/", (r, w) => {
-    w.send("hello world");
+  router.get("/", express.static(__dirname + "/frontend"));
+  router.get("/api", (r, w) => {
+    database.madeApi().then((r) => w.send(r)); //.then((res) => w.send(res));
   });
-    router.get("/hello", (r, w) => {
-      database.madeApi(w);
-    });
   return router;
 }
